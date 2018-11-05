@@ -9,7 +9,7 @@
 import UIKit
 
 class ToDoListViewController: UITableViewController {
-    let arrayList = ["jaman", "muri","khay"]
+    var itemArray = ["jaman", "muri","khay"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,11 +17,11 @@ class ToDoListViewController: UITableViewController {
     }
     //MARK - Table View Datasource Method
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return arrayList.count
+        return itemArray.count
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell",for: indexPath)
-        cell.textLabel?.text = arrayList[indexPath.row]
+        cell.textLabel?.text = itemArray[indexPath.row]
         return cell
         
     }
@@ -35,7 +35,29 @@ class ToDoListViewController: UITableViewController {
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    //MARK - Add New Item
+    
 
 
+    @IBAction func AddButtonPressed(_ sender: UIBarButtonItem) {
+        
+        
+        var textField = UITextField()
+        let alert = UIAlertController(title: "Add New Todeoy Item", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            // what will happen here once user will click our UITodeoy system
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()
+        }
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create New Item"
+            textField = alertTextField
+            
+        }
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+        
+    }
 }
 

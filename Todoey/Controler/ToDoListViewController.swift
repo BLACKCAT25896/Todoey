@@ -7,25 +7,18 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
     var itemArray = [Item]()
-    let defaults = UserDefaults.standard
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let newItem  = Item()
-        newItem.title = "Joy"
-        itemArray.append(newItem)
-        
-        let newItem2  = Item()
-        newItem2.title = "Muri Khay"
-        itemArray.append(newItem2)
-        
-        if let items = UserDefaults.standard.array(forKey: "ToDoListArray") as? [Item] {
-            itemArray = items
-        }
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        loadItems()
         
     }
     //MARK - Table View Datasource Method
@@ -36,6 +29,8 @@ class ToDoListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell",for: indexPath)
         
         let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        
         cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
@@ -61,13 +56,15 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Todeoy Item", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             // what will happen here once user will click our UITodeoy system
+           
+          
             
-            let newItem = Item()
+            let newItem = Item(context: self.context)
             newItem.title = textField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
             
-            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
-            self.tableView.reloadData()
+            self.saveItems()
         }
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Item"
@@ -77,6 +74,35 @@ class ToDoListViewController: UITableViewController {
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
         
+    }
+    
+    //MARK - Model Manupulation Data
+    
+    func saveItems()  {
+        
+        
+        do{
+            try context.save()
+            
+        }catch{
+            print("Error saving context, \(error)")
+            
+        }
+        self.tableView.reloadData()
+        
+    }
+    
+    func loadItems()  {
+
+        let request :NSFetchRequest<Item> = Item.fetchRequest()
+        
+        do{
+            
+            itemArray = try context.fetch(request)
+        }catch{
+            print("Error with fetch request \(error)")
+        }
+
     }
 }
 
